@@ -1,0 +1,123 @@
+// (C) Copyright 2020 Manolis Christodoulou
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+//   You should have received a copy of the GNU General Public License
+//   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+// MELD SCORE
+// Usage MELD(Bilirubine,INR,Creatinine)
+// Bil: mg/dL
+// Cr: mg/dL
+EXPORT MELD(Bil;INR;Cr)
+BEGIN
+IF Bil<1 THEN Bil:=1 END;
+IF INR<1 THEN INR:=1 END;
+IF Cr<1 THEN Cr:=1 END;
+ROUND(3,78*LN(Bil)+11,2*LN(INR)+9,57*LN(Cr)+6,43;0);
+END;
+
+// Nasal masc FIO2
+// LMin: L/min
+EXPORT NASALFIO2(LMin)
+BEGIN
+20,9+4*LMin;
+END;
+
+// Total blood oxygen
+// Hgb: %
+// SO2: %
+// PO2: mmHg
+EXPORT TOTALO2(Hgb;SO2;PO2)
+BEGIN
+Hgb*1,34*SO2/100+PO2*0,0031;
+END;
+
+// Proton consentration based on Ph
+EXPORT PH2H(Ph)
+BEGIN
+ALOG(9-Ph);
+END;
+
+// Body Surface area
+// Weight: Kg
+// Height: m
+EXPORT BSA(Weight;Height)
+BEGIN
+0,007184*Weight^0,425*(Height*100)^0,725;
+END;
+
+// Henderson Hasellbaclch formula
+EXPORT HENDHAS(HCO3;pCO2)
+BEGIN
+6,1+LOG(HCO3/0,03/pCO2);
+END;
+
+// Mean arterial pressure
+EXPORT MAP(Systolic;Diastolic)
+BEGIN
+(Systolic+2*Diastolic)/3;
+END;
+
+// Water Defficit
+// Na: Sodium (mEq/L)
+// Weight: Kg
+EXPORT WDEFF(Na;Weight)
+BEGIN
+0,6*((Na/140)-1)*Weight;
+END;
+
+// Corrected Sodium
+// Na: Sodium mEq/L
+// Glu: Glucose mg/dL
+EXPORT CORRNA(Na;Glu)
+BEGIN
+Na+(Glu-100)*0,016;
+END;
+
+// Corrected Calcium
+// Ca: Calcium mg/dL
+// Alb: Serum Albumine g/dL
+// NAlb: Normal value of serum albumine g/dL
+EXPORT CORRCA(Ca;Alb;NAlb)
+BEGIN
+Ca+0,8*(NAlb-Alb);
+END;
+
+// Creatine Clearance Cockroft-Gault
+// Weight: Kg
+// Cr: Creatinine mg/dL
+EXPORT CRCL(Age;Weight;Sex;Cr)
+BEGIN
+IF Sex≠1 AND Sex≠2 THEN RETURN 0; END;
+ROUND((140-Age)*Weight*PIECEWISE(Sex=1;1;Sex=2;0,85)/(72*Cr);1);
+END;
+
+// eGFR CKD-EPI
+// Cr: Creatinine mg/dL
+// Sex: 1=male, 2=female
+// Race: 1=non African American, 2=African American
+EXPORT CKD_EPI(Age; Cr; Sex; Race)
+BEGIN
+IF Sex≠1 AND Sex≠2 THEN RETURN 0; END;
+IF Race≠1 AND Race≠2 THEN RETURN 0; END;
+LOCAL K:=PIECEWISE(Sex=1;0,9;Sex=2;0,7);
+ROUND(0,993^Age*141*MIN(Cr/K;1)^PIECEWISE(Sex=1;−0,411;Sex=2;−0,329)*MAX(Cr/K;1)^−1,209*PIECEWISE(Race=1;1;Race=2;1,159)*PIECEWISE(Sex=1;1;Sex=2;1,018);1)
+END;
+
+// eGFR MDRD
+// Cr: Creatinine mg/dL
+// Sex: 1=male, 2=female
+// Race: 1=non African American, 2=African American
+EXPORT MDRD(Age; Cr; Sex; Race)
+BEGIN
+IF Sex≠1 AND Sex≠2 THEN RETURN 0; END;
+IF Race≠1 AND Race≠2 THEN RETURN 0; END;
+ROUND(186*Age^−0,203*Cr^−1,154*PIECEWISE(Sex=1;1;Sex=2;0,742)*PIECEWISE(Race=1;1;Race=2;1,212);1);
+END;
