@@ -1,3 +1,5 @@
+#pragma mode( separator(,;;) integer(h32) )
+
 // (C) Copyright 2020 Manolis Christodoulou
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,16 +13,11 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// MELD SCORE
-// Usage MELD(Bilirubine,INR,Creatinine)
-// Bil: mg/dL
-// Cr: mg/dL
 EXPORT MELD(Bil;INR;Cr)
 BEGIN
-IF Bil<1 THEN Bil:=1 END;
-IF INR<1 THEN INR:=1 END;
-IF Cr<1 THEN Cr:=1 END;
-ROUND(3,78*LN(Bil)+11,2*LN(INR)+9,57*LN(Cr)+6,43;0);
+ROUND(3,78*LN(IFTE(Bil<1;1;Bil))
++11,2*LN(IFTE(INR<1;1;INR))
++9,57*LN(IFTE(Cr<1;1;Cr))+6,43;0);
 END;
 
 // Nasal masc FIO2
